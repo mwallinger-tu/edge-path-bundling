@@ -15,22 +15,31 @@
 <body>
     <div class="container overflow-hidden" >
         <div class="row gx-6 py-3">
-            <div class="col-4 col-md-2 d-grid mx-auto">
+            <div class="col-4 col-md-2 d-grid mx-auto py-2">
                 <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/simple.json')">Simple Example</button>
             </div>
-            <div class="col-4 col-md-2 d-grid mx-auto">
-                <button class="btn btn-outline-primary" type="button">Cubes 3</button>
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
+                <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/cubes1.json')">Cubes 1</button>
             </div>
-            <div class="col-4 col-md-2 d-grid mx-auto">
-                <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/cubes.json')">Cubes 4</button>
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
+                <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/cubes2.json')">Cubes 2</button>
             </div>
-            <div class="col-4 col-md-2 d-grid mx-auto">
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
+                <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/cubes3.json')">Cubes 3</button>
+            </div>
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
+                <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/cubes4.json')">Cubes 4</button>
+            </div>
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
+                <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/noise.json')">Noise</button>
+            </div>
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
                 <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/airlines.json')">Airlines</button>
             </div>
-            <div class="col-4 col-md-2 d-grid mx-auto">
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
                 <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/migrations.json')">Migrations</button>
             </div>
-            <div class="col-4 col-md-2 d-grid mx-auto">
+            <div class="col-4 col-md-2 d-grid mx-auto  py-2">
                 <button class="btn btn-outline-primary" type="button" onclick="clickDatasetButton('./data/airtraffic.json')">Airtraffic</button>
             </div>
         </div>
@@ -41,30 +50,30 @@
         </div>
         <div class="row gx-6 py-3">
             <div class="col-4 col-md-2 d-grid mx-auto">
-                <button class="btn btn-outline-primary" type="button" onclick="clickBundleButton()">Bundle all</button>
+                <button class="btn btn-outline-primary" type="button" onclick="clickBundleButton()" data-toggle="tooltip" data-placement="bottom" title="Bundle all edges in the graph.">Bundle all</button>
             </div>
             <div class="col-4 col-md-2 d-grid mx-auto">
-                <button class="btn btn-outline-primary" type="button" onclick="clickReset()">Reset</button>
+                <button class="btn btn-outline-primary" type="button" onclick="clickReset()" data-toggle="tooltip" data-placement="bottom" title="Reset the bundling and draw the graph with straight lines.">Reset</button>
             </div>
             <div class="col-4 col-md-2 d-grid mx-auto">
                 <label for="customRange1" class="form-label" id='label1'>Distortion factor:</label>
-                <input type="range" class="form-range" min="1" max="5" step="0.5" oninput="maxDistortionChanged(this.value)"  id="customRange1">
+                <input type="range" class="form-range" min="1" max="5" step="0.5" oninput="maxDistortionChanged(this.value)"  id="customRange1" data-toggle="tooltip" data-placement="bottom" title="Change the maximum allowed distortion of an edge. I.e. the maximum value of the ratio between straight line and shortest path for an edge to be bundled.">
             </div>
             <div class="col-4 col-md-2 d-grid mx-auto">
                 <label for="customRange2" class="form-label" id='label2'>Weight factor:</label>
-                <input type="range" class="form-range" min="1" max="4" step="0.5" oninput="distWeightsChanged(this.value)"  id="customRange2">
+                <input type="range" class="form-range" min="1" max="4" step="0.5" oninput="distWeightsChanged(this.value)"  id="customRange2" data-toggle="tooltip" data-placement="bottom" title="Change the weight factor for the shortest path calculation s.t. weight(s,t) = dist(s,t)^w. E.g. 1.0 is Euclidean distance.">
             </div>
             <div class="col-4 col-md-2 d-grid mx-auto">
                 <label for="customRange3" class="form-label" id='label3'>Bundle strength:</label>
-                <input type="range" class="form-range" min="1" max="4" step="1" oninput="bundleStrengthChanged(this.value)" id="customRange3">
+                <input type="range" class="form-range" min="1" max="4" step="1" oninput="bundleStrengthChanged(this.value)" id="customRange3" data-toggle="tooltip" data-placement="bottom" title="Set the bundling strength. A value above 1 will subdivide the path and introduce additional control points for the Bezíer curve.">
             </div>
             <div class="col-4 col-md-2 d-grid mx-auto">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="isInteractive">
+                    <input class="form-check-input" type="checkbox" id="isInteractive" data-toggle="tooltip" data-placement="bottom" title="Immediately apply bundling parameter change. Depending on computational power only feasible for smaller graphs.">
                     <label class="form-check-label" for="flexSwitchCheckDefault">Interactive</label>
                 </div>
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="isAnimated">
+                    <input class="form-check-input" type="checkbox" id="isAnimated"  data-toggle="tooltip" data-placement="bottom" title="Animate the bundling.">
                     <label class="form-check-label" for="flexSwitchCheckDefault">Animated</label>
                 </div>
             </div>
