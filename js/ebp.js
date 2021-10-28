@@ -280,6 +280,9 @@ class EdgePathBundling {
 
     }
 
+    /**
+     * Calculate more control points for the Bezier curve by subdividing each edge of the path into two sub edges.
+     */
     subdivision() {
         this.edges.forEach(edge => {
             if(this.bundled[edge.id]) {
@@ -290,7 +293,13 @@ class EdgePathBundling {
     }
 
     
-
+    /**
+     * Given a list of points this function returns a list of points where a new point is inserted between every consecutive pair of points. The parameter s states how often an edge is subdivided.
+     * 
+     * @param {[object]} points 
+     * @param {int} s 
+     * @returns [objects]
+     */
     subdivide(points, s) {
         for(var i = 1; i < s; i++) {
             var newCP = []
@@ -314,6 +323,13 @@ class EdgePathBundling {
         return points;
    }
 
+   /**
+    * Animate the bundling by adding 
+    * 
+    * @param {Renderer} renderer 
+    * @param {int} steps 
+    * @param {float} frameT 
+    */
    animate(renderer, steps, frameT) {
         renderer.clear()
 
@@ -342,46 +358,76 @@ class EdgePathBundling {
             edge.anim = anim;
         });
 
-        this.doFrame(renderer, this, steps, frameT);
+        var worker = new Worker('animationWorker.js')
+        
+        this.doFrame(renderer, this, steps, frameT, worker);
     }
 
-    doFrame(renderer, tthis, remaining, frameT) {
+    doFrame(renderer, tthis, remaining, frameT, worker) {
         var t0 = performance.now()
-        renderer.clear();
-        tthis.edges.forEach(edge => {
-            if (tthis.bundled[edge.id]) {
-                for(var i = 0; i < edge.controlpoints.length; i++) {
-                    edge.anim[i].x -= edge.delta[i].x;
-                    edge.anim[i].y -= edge.delta[i].y;
+        worker.postMessage([tthis.edges, tthis.bundled, t0, remaining]);
+
+        
+
+        worker.addEventListener('message', function(e) {
+            var edges = e.data[0];
+            var t0 = e.data[1];
+            var steps = e.data[2];
+
+            renderer.clear();
+
+            edges.forEach(edge => {
+                if (tthis.bundled[edge.id]) {
+                    renderer.drawLine(edge.anim, edge.color);     
+                    //renderer.drawLine(edge.anim, '#fe8a71'); 
                 }
-                //renderer.drawLine(edge.anim, edge.color);     
-                renderer.drawLine(edge.anim, '#fe8a71'); 
-            }
-            else {
-                //renderer.drawLine(edge.controlpoints, edge.color);   
-                if(tthis.locked[edge.id])     
-                    renderer.drawLine(edge.controlpoints, '#3da4ab');   
+                else {
+                    renderer.drawLine(edge.controlpoints, edge.color);   
+                }
+            });
+
+            tthis.nodes.forEach(node => {
+                renderer.drawPoint(node);
+            });
+
+            var t1 = performance.now();
+            var tPassed = frameT - (t1 - t0);
+    
+            renderer.draw();
+            //console.log(tPassed, steps)
+
+            if (steps > 0) {           
+                if (tPassed > 0)
+                    setTimeout(function() {
+                        worker.postMessage([null, null, t1, steps-1]);
+                    }, tPassed);
                 else
-                    renderer.drawLine(edge.controlpoints, '#000000');   
+                    //tthis.doFrame(renderer, tthis, steps - 1, frameT, worker);
+                    worker.postMessage([null, null, t1, steps-1]);
             }
         });
 
-        tthis.nodes.forEach(node => {
-            renderer.drawPoint(node);
-        });
-
-        var t1 = performance.now();
-        var tPassed = frameT - (t1 - t0);
-
-        if (remaining <= 0)
-            return;
-
-        if (tPassed > 0)
-            setTimeout(tthis.doFrame, tPassed, renderer, tthis, remaining - 1, frameT);
-        else
-            tthis.doFrame(renderer, tthis, remaining - 1, frameT);
+        // tthis.edges.forEach(edge => {
+        //     if (tthis.bundled[edge.id]) {
+        //         for(var i = 0; i < edge.controlpoints.length; i++) {
+        //             edge.anim[i].x -= edge.delta[i].x;
+        //             edge.anim[i].y -= edge.delta[i].y;
+        //         }
+        //         //renderer.drawLine(edge.anim, edge.color);     
+        //         renderer.drawLine(edge.anim, '#fe8a71'); 
+        //     }
+        //     else {
+        //         //renderer.drawLine(edge.controlpoints, edge.color);   
+        //         if(tthis.locked[edge.id])     
+        //             renderer.drawLine(edge.controlpoints, '#3da4ab');   
+        //         else
+        //             renderer.drawLine(edge.controlpoints, '#000000');   
+        //     }
+        // });
         
     }
+
+
 
     drawGraphBundled(renderer) {
         var t0 = performance.now()
@@ -396,6 +442,7 @@ class EdgePathBundling {
             renderer.drawPoint(node);
         });
 
+        renderer.draw();
         var t1 = performance.now()
         console.log("Rendering took " + (t1 - t0) + " milliseconds.")
     }
@@ -415,7 +462,10 @@ class EdgePathBundling {
         });
 
         var t1 = performance.now()
+        
+        renderer.draw();
         console.log("Rendering took " + (t1 - t0) + " milliseconds.")       
+
     }
 
 
@@ -518,11 +568,21 @@ class EdgePathBundling {
 class Render {
     constructor(selector) {
         this.canvas = document.querySelector(selector);
-        this.context = this.canvas.getContext('2d');
+        this.drawcontext = this.canvas.getContext('2d');
+
+        this.offscreen = document.createElement('canvas');
+        this.offscreen.width = this.canvas.width;
+        this.offscreen.height = this.canvas.height;
+        this.context = this.offscreen.getContext("2d");
+
     }
 
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    draw() {
+        this.drawcontext.putImageData(this.context.getImageData(0,0, this.canvas.width, this.canvas.height), 0, 0);
     }
 
     drawPoint(node) {

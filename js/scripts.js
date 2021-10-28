@@ -2,11 +2,11 @@
 var svg;
 var EPB;
 var Renderer;
+var Offscreen;
 var width, height;
 
 window.onload = function () {
     resetInput()
-    Render = new Render('#Canvas');
     
     var container = document.getElementById('VizContainer');
     var canvas = document.getElementById('Canvas');
@@ -16,6 +16,8 @@ window.onload = function () {
     canvas.width = width;
     canvas.height = height;
 
+    Renderer = new Render('#Canvas');
+
     d3.json('./data/simple.json').then(function(data){
         bundled = false;
 
@@ -24,7 +26,7 @@ window.onload = function () {
 
         EBP = new EdgePathBundling(nodes, links, width, height);
     }).then(function(){
-        EBP.drawGraphStraight(Render);
+        EBP.drawGraphStraight(Renderer);
     });
 }
 
@@ -50,7 +52,7 @@ function clickDatasetButton(path) {
 
         EBP = new EdgePathBundling(nodes, links, width, height);
     }).then(function(){
-        EBP.drawGraphStraight(Render);
+        EBP.drawGraphStraight(Renderer);
     });
 }
 
@@ -59,14 +61,14 @@ function clickBundleButton() {
     EBP.subdivision();
     
     if(document.getElementById("isAnimated").checked)
-        EBP.animate(Render, 100, 5);
+        EBP.animate(Renderer, 50, 20);
     else 
-        EBP.drawGraphBundled(Render);
+        EBP.drawGraphBundled(Renderer);
 }
 
 
 function clickReset() {
-    EBP.drawGraphStraight(Render);
+    EBP.drawGraphStraight(Renderer);
 }
 
 function bundleStrengthChanged(value) {
@@ -77,9 +79,9 @@ function bundleStrengthChanged(value) {
     EBP.subdivision();
     
     if(document.getElementById("isAnimated").checked)
-        EBP.animate(Render, 10, 200);
+        EBP.animate(Renderer, 50, 20);
     else 
-        EBP.drawGraphBundled(Render);
+        EBP.drawGraphBundled(Renderer);
 }
 
 function distWeightsChanged(value) {
@@ -92,9 +94,9 @@ function distWeightsChanged(value) {
         EBP.subdivision();
 
         if(document.getElementById("isAnimated").checked)
-            EBP.animate(Render, 10, 200);
+            EBP.animate(Renderer, 50, 20);
         else 
-            EBP.drawGraphBundled(Render);
+            EBP.drawGraphBundled(Renderer);
     }
 }
 
@@ -107,9 +109,9 @@ function maxDistortionChanged(value) {
         EBP.subdivision();
 
         if(document.getElementById("isAnimated").checked)
-            EBP.animate(Render, 10, 200);
+            EBP.animate(Renderer, 10, 200);
         else 
-            EBP.drawGraphBundled(Render);
+            EBP.drawGraphBundled(Renderer);
     }
 }
 
