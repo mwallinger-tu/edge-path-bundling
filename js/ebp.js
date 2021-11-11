@@ -358,7 +358,7 @@ class EdgePathBundling {
             edge.anim = anim;
         });
 
-        var worker = new Worker('animationWorker.js')
+        var worker = new Worker('js/animationWorker.js')
         
         this.doFrame(renderer, this, steps, frameT, worker);
     }
